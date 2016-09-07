@@ -1,0 +1,137 @@
+// -----------------------------------------------------------------------------
+// Table of Contents
+//
+//  - Variables
+//  - Set Specific Breakpoints
+//  - Create Breakpoint Zones
+//  - Apply Zones
+//  - Mixins
+//  - Hologram Documentation
+//
+// REQUIREMENTS:
+// - stripUnits function (from this repo)
+// - pem function (from this repo)
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
+// -- Variables
+// -----------------------------------------------------------------------------
+
+$bp--screen: "only screen";
+$bp--landscape: "#{$bp--screen} and (orientation: landscape)";
+$bp--portrait: "#{$bp--screen} and (orientation: portrait)";
+
+// -----------------------------------------------------------------------------
+// -- Set Specific Breakpoints
+// -----------------------------------------------------------------------------
+// First things first, we want to define our breakpoints. We can use pixels
+// here since we'll be converting those to ems below. You can add, or remove,
+// breakpoints from this map and the changes will cascade throughout the entire
+// breakpoint system.
+//
+// At this point, the values can be visualized as such...
+//
+//               |                   |                     |               etc.
+//         map-get($bp, 1)     map-get($bp, 2)       map-get($bp, 3)
+// -----------------------------------------------------------------------------
+
+$bp: (
+  1: 500,
+  2: 750,
+  3: 1000,
+  4: 1250,
+  5: 1500,
+  6: 1750,
+  7: 2000,
+);
+
+$bp--count: length($bp);
+
+// -----------------------------------------------------------------------------
+// -- Create Breakpoint Zones
+// -----------------------------------------------------------------------------
+// When thinking about a site's design, it's easier to think of the range that
+// it applies to, rather than the specific point at which is changes. A zone
+// can be entered from either side, whereas a specific change only occurs at a
+// single point.
+//
+// These variables give us the lower and upper boundaries of each zone, so we
+// can now visualize the breakpoints as such...
+//
+//   (Zone 1)    |     (Zone 2)      |      (Zone 3)       |         etc.
+//
+// -----------------------------------------------------------------------------
+
+// Set lower bounds map
+$bp--lowerBound: (
+  1: pem(0, 16),
+);
+
+// Add lower bounds keys dynamically, based on amount of $bp's set.
+// Need to add 1 to account for the final zone, since zones end at the $bp.
+@for $key from 2 through ($bp--count + 1) {
+  $bp--lowerBound: map-merge($bp--lowerBound, ($key: pem(map-get($bp, $key - 1) + 1, 16)));
+}
+
+// Set upper bounds map
+$bp--upperBound: (
+  1: pem(map-get($bp, 1), 16),
+);
+
+// Add upper bounds keys dynamically, based on amount of $bp's set.
+@for $key from 2 through $bp--count {
+  $bp--upperBound: map-merge($bp--upperBound, ($key: pem(map-get($bp, $key), 16)));
+}
+
+// -----------------------------------------------------------------------------
+// -- Apply Zones
+// -----------------------------------------------------------------------------
+// Here is where we apply the breakpoints in the browser. When applying media
+// scoped CSS, you either want to apply it to a single zone, you want to apply
+// it to a zone and have it apply to all the zones that are wider, or you want
+// to apply it to a zone and apply it to all the other zones that are narrower.
+//
+// Examples:
+// - $bpOnly--2
+//   (  NO  )    |     (  YES  )      |      (  NO  )       |         etc.
+//
+// - $bpUp--2
+//   (  NO  )    |     (  YES  )      |      (  YES )       |         etc.
+//
+// - $bpDown--2
+//   (  YES )    |     (  YES  )      |      (  NO  )       |         etc.
+// -----------------------------------------------------------------------------
+
+// Set zone map that scopes MQ's to apply upwards
+$bp--up: (
+  2: "(min-width: #{map-get($bp--lowerBound, 2)})",
+);
+
+// Dynamically build the other upward scoped zones based on the amount of $bp's
+@for $key from 3 through $bp--count {
+  $bp--up: map-merge($bp--up, ($key: "(min-width: #{map-get($bp--lowerBound, $key)})"));
+}
+
+// Set zone map that scopes MQ's to apply downwards
+$bp--down: (
+  2: "(max-width: #{map-get($bp--upperBound, 2)})",
+);
+
+// Dynamically build the other downward scoped zones based on the amount of $bp's
+@for $key from 3 through $bp--count {
+  $bp--down: map-merge($bp--down, ($key: "(max-width: #{map-get($bp--upperBound, $key)})"));
+}
+
+// Set zone map that scopes MQ's to a single MQ
+$bp--only: (
+  1: "(max-width: #{map-get($bp--upperBound, 1)})",
+);
+
+// Dynamically build the other single scoped zones based on the amount of $bp's
+@for $key from 2 through $bp--count {
+  $bp--only: map-merge($bp--only, ($key: "(min-width: #{map-get($bp--lowerBound, $key)}) and (max-width: #{map-get($bp--upperBound, $key)})"));
+}
+
+// Need to add a final single scoped zone for the last $bp the final zone, since
+// zones end at the $bp.
+$bp--only: map-merge($bp--only, (($bp--count + 1): "(min-width: #{map-get($bp--upperBound, $bp--count)})"));

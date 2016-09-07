@@ -1,0 +1,17 @@
+// -----------------------------------------------------------------------------
+// !-- Input Appearance
+// We can't rely on Autoprefixer because appearance is a non-standard css
+// property. Nothing fancy, just an input style reset.
+//
+// WARNING:
+// Don't go crazy redesigning inputs. Visitor expectations of what a form input
+// looks and functions like should take precedence over fancy design. Any
+// design changes to form elements should serve to make them easier to use and
+// less error prone.
+// -----------------------------------------------------------------------------
+
+@mixin inputAppearance($value: none) {
+  -webkit-appearance: $value;
+     -moz-appearance: $value;
+          appearance: $value;
+}

@@ -1,0 +1,48 @@
+// -----------------------------------------------------------------------------
+// !-- Retina Rasterized Images
+// -----------------------------------------------------------------------------
+// Save 2 versions of background images: 1 at actual size, 1 twice as big. Pass
+// them in as variables, using the asset pipeline paths. Then, a few things
+// happen:
+//
+// 1. The small image is made the background of the item.
+// 2. If the device has a pixel density of 1.5 or higher (output with Scut) the
+//    large image is used instead.
+// 3. The large image is resized to the same dimensions of the small image
+//    (using Compass functions).
+//
+// REQUIREMENTS:
+// - Compass (http://compass-style.org)
+//   If not using Compass, you'll need to add width/height of image as @params
+// - Scut (https://davidtheclark.github.io/scut/)
+//   If not using Scut, replace line 29 with a resolution media query
+//
+// PARAMETERS:
+// - $image--sm: The sass image-path to the 1x sized image
+// - $image--lg: The sass image-path to the 2x sized image
+//
+// EX: (logo swap)
+//
+// .logo {
+//   @include image2x('logos/logo.png', 'logos/logo_@2x.png');
+// }
+//
+// RETURNS (CSS Background image CSS):
+// .logo {
+//   background-image: url("assets/logos/logo.png");
+//
+//   @include scut-hd-bp(1.5) {
+//     background-image: url("assets/logos/logo_@2x.png");
+//     background-size: 300px 100px;
+//   }
+// }
+// -----------------------------------------------------------------------------
+
+@mixin image2x($image--sm, $image--lg) {
+  background-image: url(image-path($image--sm));
+
+  @include scut-hd-bp(1.5) {
+    background-image: url(image-path($image--lg));
+    background-size: image-width($image--sm) image-height($image--sm);
+  }
+}

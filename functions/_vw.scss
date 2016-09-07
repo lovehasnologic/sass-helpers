@@ -1,0 +1,24 @@
+// -----------------------------------------------------------------------------
+// -- Fluid Type Sizes
+// -----------------------------------------------------------------------------
+// Sets the type size to vw units, which makes the font size larger as the
+// browser gets wider. By passing in the breakpoint we are able to better
+// control that value through each of the breakpoint zones.
+//
+// REQUIREMENTS:
+// - stripUnits function (from this repo)
+//
+// PARAMETERS:
+// - $pixels: A number that represents a measurement in pixels.
+// - $bp: The breakpoint, in pixels, at which we are setting a target size.
+//
+// EXAMPLE:
+// font-size: vw(16px, 500px);
+//
+// RETURNS (Integer w/ em unit):
+// margin: 3.2vw;
+// -----------------------------------------------------------------------------
+
+@function vw($pixels, $bp) {
+  @return ((stripUnits($pixels) / stripUnits($bp)) * 100) * 1vw;
+}
