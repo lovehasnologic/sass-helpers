@@ -91,13 +91,13 @@ $bp--upperBound: (
 // to apply it to a zone and apply it to all the other zones that are narrower.
 //
 // Examples:
-// - $bpOnly--2
+// - map-get($bp--only, 2)
 //   (  NO  )    |     (  YES  )      |      (  NO  )       |         etc.
 //
-// - $bpUp--2
+// - map-get($bp--up, 2)
 //   (  NO  )    |     (  YES  )      |      (  YES )       |         etc.
 //
-// - $bpDown--2
+// - map-get($bp--down, 2)
 //   (  YES )    |     (  YES  )      |      (  NO  )       |         etc.
 // -----------------------------------------------------------------------------
 
@@ -151,7 +151,7 @@ $bp--only: map-merge($bp--only, (($bp--count + 1): "(min-width: #{map-get($bp--u
 //  $divider: "," (default) / "and"
 //
 // EX: (breakpoint zones 2 and up)
-//
+//    (NO)   |    (YES)     |     (YES)     |     (YES)     |     (YES)
 // .selector {
 //   @include media(2, up) {
 //     ... styles here ...
@@ -159,7 +159,7 @@ $bp--only: map-merge($bp--only, (($bp--count + 1): "(min-width: #{map-get($bp--u
 // }
 //
 // EX: (breakpoint zones 2 down and 4 only)
-//
+//    (YES)   |    (YES)     |     (NO)     |     (YES)     |     (NO)
 // .selector {
 //   @include media(2 4, down only) {
 //     ... styles here ...
@@ -167,7 +167,7 @@ $bp--only: map-merge($bp--only, (($bp--count + 1): "(min-width: #{map-get($bp--u
 // }
 //
 // EX: (breakpoint zones 2 through 4)
-//
+//    (NO)   |    (YES)     |     (YES)     |     (YES)     |     (NO)
 // .selector {
 //   @include media(2 4, up down, "and") {
 //     ... styles here ...
@@ -175,7 +175,7 @@ $bp--only: map-merge($bp--only, (($bp--count + 1): "(min-width: #{map-get($bp--u
 // }
 //
 // EX: (breakpoint zone 1)
-//
+//    (YES)   |    (NO)     |     (YES)     |     (YES)     |     (NO)
 // .selector {
 //   @include media('1') {
 //     ... styles here ...
