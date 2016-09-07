@@ -5,8 +5,7 @@
 //  - Set Specific Breakpoints
 //  - Create Breakpoint Zones
 //  - Apply Zones
-//  - Mixins
-//  - Hologram Documentation
+//  - Media Query Mixin
 //
 // REQUIREMENTS:
 // - stripUnits function (from this repo)
@@ -135,3 +134,86 @@ $bp--only: (
 // Need to add a final single scoped zone for the last $bp the final zone, since
 // zones end at the $bp.
 $bp--only: map-merge($bp--only, (($bp--count + 1): "(min-width: #{map-get($bp--upperBound, $bp--count)})"));
+
+// -----------------------------------------------------------------------------
+// -- Media Query Mixin
+// -----------------------------------------------------------------------------
+//  This mixin makes media queries easier to read and work with, while also
+//  accounting for a bug in our combing and linting tools that chokes on
+//  interpolated values in `@` blocks.
+//
+//  You can pass multiple query blocks into the mixin by sending a list to each
+//  argument. The amount of items in the $zones and $spans list should match.
+//  The $divider doesn't accept a list.
+//
+//  $zones: integer(s) (corresponds to breakpoint zone)
+//  $spans: up / down / only (fallback)
+//  $divider: "," (default) / "and"
+//
+// EX: (breakpoint zones 2 and up)
+//
+// .selector {
+//   @include media(2, up) {
+//     ... styles here ...
+//   };
+// }
+//
+// EX: (breakpoint zones 2 down and 4 only)
+//
+// .selector {
+//   @include media(2 4, down only) {
+//     ... styles here ...
+//   };
+// }
+//
+// EX: (breakpoint zones 2 through 4)
+//
+// .selector {
+//   @include media(2 4, up down, "and") {
+//     ... styles here ...
+//   };
+// }
+//
+// EX: (breakpoint zone 1)
+//
+// .selector {
+//   @include media('1') {
+//     ... styles here ...
+//   };
+// }
+// -----------------------------------------------------------------------------
+
+// Find the appropriate breakpoint application map. We do it this way because
+// trying to build the map dynamically via $bp--#{direction} returns the right
+// value, but sass doesn't understand that it's a map.
+@function mqMap($zone, $direction) {
+  @if $direction == down {
+    @return map-get($bp--down, $zone);
+  } @else if $direction == up {
+    @return map-get($bp--up, $zone);
+  } @else {
+    @return map-get($bp--only, $zone);
+  }
+}
+
+// Loop through the zones in the mixin and use the map finder to get the correct
+// media query. When there are multiple mqs that are being combined, use the
+// divider to split them.
+@function mqLoop($zones, $spans, $divider: ",") {
+  $mqList: mqMap(nth($zones, 1), nth($spans, 1));
+
+  @if length($zones) > 1  {
+    @for $i from 2 through length($zones) {
+      $mqList: $mqList + $divider + mqMap(nth($zones, $i), nth($spans, $i));
+    }
+  }
+
+  @return $mqList;
+}
+
+// Create the mixin for use
+@mixin media($zones, $spans, $divider: ",") {
+  @media #{mqLoop($zones, $spans, $divider)} {
+    @content;
+  }
+}
